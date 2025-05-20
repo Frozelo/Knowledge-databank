@@ -4,18 +4,23 @@
 
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	a := 125
+	n := 121
 	var res int
-	for a > 0 {
+	for a := n; a > 0; {
 		prem := a % 10
 		res = res*10 + prem
 		a = a / 10
-
-		fmt.Println(res)
 	}
+
+	fmt.Println(res, n)
+	if res != n {
+		fmt.Println("false")
+	} else {
+		fmt.Println("true")
+	}
+
 }
+
