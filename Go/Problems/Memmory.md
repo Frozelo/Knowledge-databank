@@ -102,7 +102,7 @@ _Ответы_:
 
 ```go
 func f(a [3]int) { a[0] = 9 } // copy of array
-func g(s []int)  { s[0] = 9 } // copy of struct ptr
+func g(s []int)  { s[0] = 9 } // copy of slice struct with same ptr to arr
 
 func main() {
     arr := [3]int{1,2,3} 
