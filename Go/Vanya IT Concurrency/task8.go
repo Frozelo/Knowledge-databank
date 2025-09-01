@@ -23,9 +23,9 @@ func executeTaskWithTimeout(ctx context.Context) error {
 	// сделать что-то чтобы понять, что все ок и executeTask выполнилась
 	// <- struct{}
 
-	ch := make(chan struct{})
-	defer close(ch)
+	ch := make(chan struct{}, 1)
 	go func() {
+        defer close(ch)
 		executeTask()
 		ch <- struct{}{}
 	}()
