@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync"
 )
 
-func joinChannels(chs ...chan int) chan int {
+func fanIn(ctx context.Context, chs ...chan int) chan int {
+	out := make(chan int)
 	var wg sync.WaitGroup
 
 	wg.Add(len(chs))
@@ -13,23 +15,36 @@ func joinChannels(chs ...chan int) chan int {
 	for _, ch := range chs {
 		go func(ch chan int) {
 			defer wg.Done()
-
-			for id := range ch {
-				out <- id
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case v, ok := <-ch:
+					if !ok {
+						return
+					}
+					select {
+					case <-ctx.Done():
+						return
+					case out <- v:
+					}
+				}
 			}
 		}(ch)
+
 	}
 
 	go func() {
+		defer close(out)
 		wg.Wait()
-		close(out)
 	}()
 
 	return out
-
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	a := make(chan int)
 	b := make(chan int)
@@ -56,7 +71,7 @@ func main() {
 		close(c)
 	}()
 
-	out := joinChannels(a, b, c)
+	out := joinChannels(ctx, a, b, c)
 
 	for w := range out {
 		fmt.Println(w)
